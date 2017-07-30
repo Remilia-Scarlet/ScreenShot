@@ -85,6 +85,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data2Word\Binary2Chinese.cs" />
+    <Compile Include="general\BigNumber\BigNumber.cs" />
     <Compile Include="general\BitStream\BinaryReader.cs" />
     <Compile Include="general\BitStream\BinaryWriter.cs" />
     <Compile Include="Data2Word\Data2Word.cs">

@@ -12,6 +12,7 @@ namespace ScreenShot
     class SendManager
     {
         private const int RESEND_INTERVAL = 800;
+        private const int SENDING_INTERVAL = 10;
         private const int WAIT_MIN_MIN = 20;
         private const int WAIT_MIN_MAX = 50;
         public SendManager()
@@ -65,7 +66,7 @@ namespace ScreenShot
             IsSending = true;
             IsPausing = true;
             _waitMin = WAIT_MIN_MIN;
-            _timer = new Timer(10);
+            _timer = new Timer(SENDING_INTERVAL);
             _timer.Enabled = false;
             _timer.Elapsed += _timer_Elapsed;
             _waitForResult = WaitForClickResult.NONE;
@@ -164,7 +165,7 @@ namespace ScreenShot
                         {
                             Clear();
                             ret = false;
-                            System.Windows.Forms.MessageBox.Show("finish");
+                        //    System.Windows.Forms.MessageBox.Show("finish");
                         }
                         else
                             ret = true;
