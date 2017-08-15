@@ -8,17 +8,23 @@ namespace ScreenShot.general.BigNumber
 {
     class BigNumber
     {
-        public const uint MAX_UINT_BASE = 0;//Means 4294967296, as we doesn't have base of 0, so I use 0 as base 4294967296
+        public const uint MAX_UINT_BASE = 0;//Means system is 4294967296, as we doesn't have base of 0, so I use 0 as base 4294967296
         public BigNumber()
         {
             _data = new List<uint>();
         }
-        public BigNumber(uint number, uint targetBase)
+        public BigNumber(BigNumber other)
+        {
+            _data = new List<uint>(other._data);
+            _numBase = other._numBase;
+            _negative = other._negative;
+        }
+        public BigNumber(uint number, bool negative, uint targetBase)
             :this()
         {
             if (checkValidBase(targetBase))
             {
-                fromInt(number, targetBase);
+                fromInt(number, negative, targetBase);
             }
         }
         public BigNumber(uint[] data, uint dataBase)
@@ -29,7 +35,7 @@ namespace ScreenShot.general.BigNumber
                 _numBase = dataBase;
             }
         }
-        public BigNumber fromInt(uint number, uint targetBase)
+        public BigNumber fromInt(uint number,bool negative, uint targetBase)
         {
             if(!checkValidBase(targetBase))
                 return this;
@@ -37,17 +43,18 @@ namespace ScreenShot.general.BigNumber
             _data.Clear();
             while(number > 0)
             {
-                _data.Add((uint)(number % targetBase));
-                number = (uint)(number / targetBase);
+                _data.Add((number % targetBase));
+                number = number / targetBase;
             }
             _numBase = targetBase;
+            _negative = negative;
             return this;
         }
         public BigNumber sysConvertion(uint targetBase)
         {
             if (!checkValidBase(targetBase))
                 return this;
-            BigNumber sys = new BigNumber(targetBase, _numBase);
+            BigNumber sys = new BigNumber(targetBase, false, _numBase);
             uint remainder = 0;
             List<uint> newNum = new List<uint>();
             while (this.toInt() != 0)
@@ -56,6 +63,41 @@ namespace ScreenShot.general.BigNumber
                 newNum.Add(remainder);
             }
             _data = newNum;
+            return this;
+        }
+        public BigNumber add(BigNumber other)
+        {
+            if (other._numBase != _numBase)
+                other = new BigNumber(other).sysConvertion(_numBase);
+            int thisLen = _data.Count;
+            int otherLen = other._data.Count;
+            int maxLen = Math.Max(thisLen, otherLen);
+            _data.Capacity = maxLen;
+            bool carry = false;
+            for (int i = 0; i < maxLen; ++i) 
+            {
+                ulong sum = _data[i]
+                    + (i < otherLen ? other._data[i] : 0u)
+                    + (carry ? 1u : 0u) ;
+                carry = false;
+                if(sum >= _numBase)
+                {
+                    sum -= _numBase;
+                    carry = true;
+                }
+            }
+            if(carry)
+            {
+                _data.Add(1u);
+            }
+            return this;
+        }
+        public BigNumber minus(BigNumber other)
+        {
+            if (other._numBase != _numBase)
+                other = new BigNumber(other).sysConvertion(_numBase);
+
+
             return this;
         }
         public BigNumber divide(BigNumber divisor, out uint remainder)
@@ -71,6 +113,7 @@ namespace ScreenShot.general.BigNumber
             //}
             return this;
         }
+
         public BigNumber divide(BigNumber divisor)
         {
             uint remainder = 0;
@@ -79,9 +122,9 @@ namespace ScreenShot.general.BigNumber
         public uint toInt()
         {
             uint num = 0;
-            for (int i = 0; i < _data.Count; ++i) 
+            for (uint i = 0; i < _data.Count; ++i) 
             {
-                num += _data[i] * (uint)pow(_numBase, (uint)i);
+                num += _data[(int)i] * pow(_numBase, i);
             }
             return num;
         }
@@ -103,7 +146,10 @@ namespace ScreenShot.general.BigNumber
         {
 
         }
+
+
         private List<uint> _data;
         private uint _numBase;
+        private bool _negative;
     }
 }
